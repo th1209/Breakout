@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class MainController : MonoBehaviour
 {
@@ -209,5 +210,10 @@ public class MainController : MonoBehaviour
     public bool IsDead()
     {
         return (life <= 0);
+    }
+
+    public void ToStageSelect()
+    {
+        SceneManager.LoadScene("StageSelect");
     }
 }
