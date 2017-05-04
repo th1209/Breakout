@@ -22,6 +22,11 @@ public class Block : MonoBehaviour
         hitCount = 0;
     }
 
+    public void SetBreakCount (int breakCount)
+    {
+        this.breakCount = breakCount;
+    }
+
     void OnCollisionEnter(Collision other)
     {
         // ボールとぶつかった際の処理。

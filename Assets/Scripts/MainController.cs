@@ -28,6 +28,9 @@ public class MainController : MonoBehaviour
     protected GameObject ball;
     protected Bar bar;
 
+    // ブロック生成に責務を持つクラス。
+    protected BlockGenerator blockGenerator;
+
     // 現在のスコアとライフ。
     protected int score;
     protected int life;
@@ -52,6 +55,7 @@ public class MainController : MonoBehaviour
      */
     public void Start ()
     {
+        //Debug.Log(currentStage);
         // 各UIの参照を保持しておく。
         readyPanel     = GameObject.Find("ReadyPanel");
         gameOverPanel  = GameObject.Find("GameOverPanel");
@@ -62,6 +66,9 @@ public class MainController : MonoBehaviour
         // バーを取得。
         bar = GameObject.Find("Bar").GetComponent<Bar>();
 
+        // ブロック生成用のインスタンスを取得。
+        blockGenerator = GameObject.Find("BlockGenerator").GetComponent<BlockGenerator>();
+
         // その他初期化処理(メインシーンのリセット時にも、同じ処理が呼ばれる)。
         ResetGame();
     }
@@ -71,7 +78,6 @@ public class MainController : MonoBehaviour
      */
     public void ResetGame()
     {
-        Debug.Log("Pushed");
         // このコントローラが管理する変数をリセット。
         score = 0;
         life  = defaultLife;
@@ -90,19 +96,7 @@ public class MainController : MonoBehaviour
      */
     protected void InitBlocks()
     {
-        // 以下、デバッグ用にコメントインする。
-        // Instantiate(blockPrefab, new Vector3(0, 1, 5), Quaternion.identity);
-
-        // TODO: ひとまず適当なブロックを生成している。後ほど専用の生成用クラスに切り出すこと。
-        int zMin = 2;
-        int zMax = 4;
-        int xMin = -3;
-        int xMax = 3;
-        for (int z = zMin; z < zMax; z++) {
-            for (int x = xMin; x < xMax; x++) {
-                Instantiate(blockPrefab, new Vector3(x, 1, z), Quaternion.identity);
-            }
-        }
+        blockGenerator.GenerateBlocks();
     }
 
     /**
@@ -124,7 +118,7 @@ public class MainController : MonoBehaviour
      */
     protected void InitBallAndBar()
     {
-        ball = (GameObject)Instantiate(ballPrefab, new Vector3(0, 1, 0), Quaternion.identity);
+        ball = (GameObject)Instantiate(ballPrefab, new Vector3(0, 1, -6), Quaternion.identity);
         bar.AlignCenter();
     }
 
