@@ -70,6 +70,7 @@ public class MainController : MonoBehaviour
      */
     public void ResetGame()
     {
+        Debug.Log("Pushed");
         // このコントローラが管理する変数をリセット。
         score = 0;
         life  = defaultLife;
