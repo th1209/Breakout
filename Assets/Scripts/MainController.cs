@@ -23,6 +23,9 @@ public class MainController : MonoBehaviour
     protected Text scoreText;
     protected Text lifeText;
 
+    // SE再生用クラス。
+    protected SePlayer sePlayer;
+
     // このコントローラーで操作するボールとバー。
     // ボールは、必要に応じて破棄と再生成を行う。
     protected GameObject ball;
@@ -55,13 +58,13 @@ public class MainController : MonoBehaviour
      */
     public void Start ()
     {
-        //Debug.Log(currentStage);
-        // 各UIの参照を保持しておく。
-        readyPanel     = GameObject.Find("ReadyPanel");
-        gameOverPanel  = GameObject.Find("GameOverPanel");
-        gameClearPanel = GameObject.Find("GameClearPanel");
-        scoreText      = GameObject.Find("ScoreText").GetComponent<Text>();
-        lifeText       = GameObject.Find("LifeText").GetComponent<Text>();
+        // 各GameObjectやComponentの参照を保持しておく。
+        this.readyPanel     = GameObject.Find("ReadyPanel");
+        this.gameOverPanel  = GameObject.Find("GameOverPanel");
+        this.gameClearPanel = GameObject.Find("GameClearPanel");
+        this.scoreText      = GameObject.Find("ScoreText").GetComponent<Text>();
+        this.lifeText       = GameObject.Find("LifeText").GetComponent<Text>();
+        this.sePlayer       = GameObject.Find("SePlayer").GetComponent<SePlayer>();
 
         // バーを取得。
         bar = GameObject.Find("Bar").GetComponent<Bar>();
@@ -208,6 +211,13 @@ public class MainController : MonoBehaviour
 
     public void ToStageSelect()
     {
+        this.sePlayer.Play("button");
         SceneManager.LoadScene("StageSelect");
+    }
+
+    public void Retry()
+    {
+        this.sePlayer.Play("button");
+        this.ResetGame();
     }
 }

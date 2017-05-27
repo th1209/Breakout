@@ -14,11 +14,16 @@ using UnityEngine;
 /// </remarks>
 public class BlockDestroyer : MonoBehaviour
 {
-    // ブロック破壊時効果音。
-    public AudioClip breakSe;
-
     // ブロック破壊時エフェクト。
     public GameObject explosionEffectPrefab;
+
+    // SE再生用クラス。
+    protected SePlayer sePlayer;
+
+    public void Start()
+    {
+        this.sePlayer = GameObject.Find("SePlayer").GetComponent<SePlayer>();
+    }
 
     /// <summary>
     /// ブロック破壊時の処理をまとめて実施する。
@@ -27,7 +32,7 @@ public class BlockDestroyer : MonoBehaviour
     /// <param name="block">Block.</param>
     public void DestroyBlock(Block block)
     {
-        this.gameObject.GetComponent<AudioSource>().PlayOneShot(breakSe);
+        this.sePlayer.Play("explosion");
 
         GameObject effect = (GameObject)Instantiate(explosionEffectPrefab, block.gameObject.transform.position, Quaternion.identity);
         // エフェクト終了までに時間がかかるので、一定時間待ってからDestroy。
