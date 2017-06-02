@@ -8,136 +8,101 @@ using UnityEngine;
 public class BlockGenerator : MonoBehaviour
 {
     // 現在選択しているステージ。
-    //public static string currentStage = "1-1";
-    public static string currentStage;
+    public static string currentStage = "1-1";
 
-    protected static Dictionary<string, int[][]> blockMap;
-
-    // ブロックの雛形
-    // TODO: 後ほど、別のブロック生成用クラスに切り出すこと。
+    // ブロックの雛形。
     public GameObject blockPrefab;
 
-    // ブロックの生成範囲
-    public int xMin;
-    public int xMax;
-    public int zMin;
-    public int zMax;
+    // ブロックのマテリアルの雛形の配列。
+    public List<Material> materialPrefabs;
 
-    /**
-     * 静的メンバ用コンストラクタ。
-     */
-    static BlockGenerator()
-    {
-        // 現在のステージに、適当な値を代入しておく。
-        currentStage = "1-1";
+    // ブロックの配置を開始する初期位置。
+    // TODO:
+    // ステージの形が変わる場合、配置の初期位置も変わるはず。
+    // StageGeneratorなどのクラスを作って、初期位置を埋め込めるようにすること。
+    //public float initX = 0.0f;
+    //public float initZ = 0.0f;
+    public float initX = -23.0f;
+    public float initZ = 17.0f;
 
-        // mapにステージの情報を設定する。
-        // 数値の意味:
-        //   0 : ブロック生成しない。
-        //   1以上 : 硬さ1のブロックを生成。
-        // 注意点:
-        //  * 本格的なゲーム開発では、以下のように修正すること。
-        //    * ファイルなどから読み取ること。
-        //    * 全てのステージの情報を読み込まないで、必要なステージの情報だけリードすること。
-        //    * 数値ではなく、定数で渡したほうが拡張性が高いはず(何か特徴を持ったブロックを生成したい場合etc)。
-        blockMap = new Dictionary<string, int[][]>();
-        blockMap.Add("1-1", new int[][]{
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-            new int[]{1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1,},
-            new int[]{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0,},
-        });
-        blockMap.Add("1-2", new int[][]{
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-            new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,},
-        });
-    }
+    private float curX;
+    private float curZ;
+    private List<BlockDataHolder> blockDataHolderList;
 
     public static void SetStage(string stage)
     {
         currentStage = stage;
     }
 
-    //TODO staticかな、どうだろう
-    // ブロックを生成し、Stageに配置する。
+    /// <summary>
+    /// Blockインスタンスをcsvから生成し、画面上に描画する。
+    /// </summary>
     public void GenerateBlocks()
     {
-        // mapのキーチェック。
-        if (! blockMap.ContainsKey(currentStage)) {
-            Debug.Assert(false, "存在しないステージ。");
+        this.ReadBlockListFromCsv();
+        this.InstantiateBlocks();
+    }
+
+    private void ReadBlockListFromCsv()
+    {
+        // 一旦ブロック配列を初期化する。
+        this.blockDataHolderList = new List<BlockDataHolder>();
+
+        // Csvファイルから文字列を読み取る。
+        TextAsset textAsset = Resources.Load<TextAsset>("Csv/MapData/" + currentStage + "_blockList");
+        if (textAsset == null) {
+            Debug.Assert(false);
+        }
+        string text = textAsset.text;
+        if (text.IndexOf('\r') < 0) {
+            Debug.Assert(false, "改行コードにCRが含まれています。");
         }
 
-        // blockMap上の参照位置を示す変数。
-        int mapZ = 0;
-        int mapX = 0;
+        // ブロック配列に値を詰める。
+        string[] row = text.Split('\n');
+        for (int i = 0; i < row.Length; i++) {
+            if (i == 0) continue;
 
-        // 生成位置をずらしつつ、ブロック生成。
-        for (int posZ = zMax; posZ >= zMin; posZ--) {
-            for (int posX = xMin; posX <= xMax; posX++) {
-                GenerateBlock(posX, posZ, mapX, mapZ);
-                mapX++;
-            }
-            mapX = 0;
-            mapZ++;
+            if (row[i] == "") continue;
+
+            var columns = row[i].Split(',');
+            this.blockDataHolderList.Add(new BlockDataHolder {
+                rowNumber  = int.Parse(columns[0]),
+                width      = float.Parse(columns[1]),
+                height     = float.Parse(columns[2]),
+                blockType  = (BLOCK_TYPE)(int.Parse(columns[3])),
+                breakCount = int.Parse(columns[4]),
+                hitScore   = int.Parse(columns[5]),
+            });
         }
     }
 
-    /// <summary>
-    /// 個々のブロックを生成する。
-    /// </summary>
-    /// <param name="posX">Position x.</param>
-    /// <param name="posZ">Position z.</param>
-    /// <param name="mapX">Map x.</param>
-    /// <param name="mapZ">Map z.</param>
-    public void GenerateBlock(int posX, int posZ, int mapX, int mapZ)
+    private void InstantiateBlocks()
     {
-        int breakCount = blockMap[currentStage][mapZ][mapX];
+        // 一旦現在の座標情報をリセット。
+        this.curX = this.initX;
+        this.curZ = this.initZ;
 
-        // mapの値が0の場合はインスタンス生成しない。
-        if (breakCount <= 0) {
-            return;
+        int curRowNum = 0;
+        foreach (BlockDataHolder dataHolder in this.blockDataHolderList) {
+            if (curRowNum != dataHolder.rowNumber) {
+                // 現在の座標情報を更新。
+                curRowNum = dataHolder.rowNumber;
+                this.curX = this.initX;
+                this.curZ -= dataHolder.height;
+            }
+
+            float x = this.curX + dataHolder.width  / 2.0f;
+            float z = this.curZ - dataHolder.height / 2.0f;
+
+            if (dataHolder.blockType >= BLOCK_TYPE.BLOCK_TYPE_NORMAL) {
+                // ブロック生成。
+                Block block = Instantiate(this.blockPrefab, new Vector3(x, 1, z), Quaternion.identity).GetComponent<Block>();
+                block.InitFromDataHolder(dataHolder);
+                block.InitMaterial(this.materialPrefabs);
+            }
+
+            this.curX += dataHolder.width;
         }
-
-        // ブロックを生成。
-        Block block = Instantiate(blockPrefab, new Vector3(posX, 1, posZ), Quaternion.identity).GetComponent<Block>();
-        block.Initialze(breakCount);
-
-        //// 硬さをセット。
-        //int breakCount = currentBlock;
-        //block.SetBreakCount(breakCount);
     }
 }
