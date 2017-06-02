@@ -121,7 +121,8 @@ public class MainController : MonoBehaviour
      */
     protected void InitBallAndBar()
     {
-        ball = (GameObject)Instantiate(ballPrefab, new Vector3(0, 1, -6), Quaternion.identity);
+        ball = (GameObject)Instantiate(ballPrefab, new Vector3(0, 0, 0), Quaternion.identity);
+        ball.GetComponent<Ball>().InitPosition();
         bar.AlignCenter();
     }
 
