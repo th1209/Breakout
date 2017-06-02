@@ -19,6 +19,8 @@ public class SePlayer : MonoBehaviour
 
     public void Play(string seName)
     {
+        DontDestroyOnLoad(this.gameObject);
+
         int index = this.audioClipKeys.FindIndex((string clipName) => { return clipName == seName; });
         if (index < 0) {
             Debug.Assert(false);
